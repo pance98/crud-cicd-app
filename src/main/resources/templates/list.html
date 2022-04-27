@@ -22,9 +22,12 @@
     </form>
     <div>
         <!-- ProductsController.showAdd -->
-        <a href="/products/add"  sec:authorize="hasRole('ROLE_ADMIN')" class="add-item">
-            Add new product
-        </a>
+        <button type="button">
+            <a href="/products/add"  sec:authorize="hasRole('ROLE_ADMIN')" class="add-item">
+                ADD new product
+            </a>
+        </button>
+
     </div>
     <table>
         <tr>
