@@ -15,7 +15,6 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    services:
 
     steps:
       - uses: actions/checkout@v2
@@ -37,5 +36,5 @@ jobs:
       - name: Change permissions
         run: chmod +x ./mvnw
       - name: Maven Clean install and Push to Dockerhub
-        run: ./mvnw clean package --no-transfer-progress -P jib-push-to-dockerhub -Dapp.image.tag=${{steps.build-number.outputs.BUILD_NUMBER}}
+        run: ./mvnw clean installg --no-transfer-progress -P jib-push-to-dockerhub -Dapp.image.tag=${{steps.build-number.outputs.BUILD_NUMBER}}
         if: always()
