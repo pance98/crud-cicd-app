@@ -11,6 +11,10 @@ env:
   JAVA_VERSION: 11
   # DockerHub
   DOCKER_HUB_USERNAME: encap02
+  # AWS & Elastic Bean Stalk
+  EB_ENVIRONMENT_NAME: Crudcicdapp-env
+  EB_APPLICATION_NAME: crud-cicd-app
+  EB_DEPLOYMENT_PACKAGE: elasticbeanstalk/docker-compose.yml
 
 jobs:
   deploy:
@@ -37,4 +41,27 @@ jobs:
         run: chmod +x ./mvnw
       - name: Maven Clean install and Push to Dockerhub
         run: ./mvnw clean install --no-transfer-progress -P jib-push-to-dockerhub -Dapp.image.tag=${{steps.build-number.outputs.BUILD_NUMBER}}
+      - name: Update and commit app version in docker-compose.yaml
+        run: |
+          BUILD_NUMBER=${{steps.build-number.outputs.BUILD_NUMBER}}
+          echo -e "Current elasticbeanstalk/docker-compose.yml\n$(cat elasticbeanstalk/docker-compose.yml)"
+          sed -i -E 's_(encap02/springboot-react-fullstack:)([^"]*)_\1'${BUILD_NUMBER}'_' elasticbeanstalk/docker-compose.yml
+          echo -e "Current elasticbeanstalk/docker-compose.yml\n$(cat elasticbeanstalk/docker-compose.yml)"
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add elasticbeanstalk/docker-compose.yml
+          git commit -m "new app version: ${BUILD_NUMBER}"
+          git push
+      - name: Beanstalk Deploy
+        uses: einaregilsson/beanstalk-deploy@v20
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          environment_name: ${{ env.EB_ENVIRONMENT_NAME }}
+          application_name: ${{ env.EB_APPLICATION_NAME }}
+          deployment_package: ${{ env.EB_DEPLOYMENT_PACKAGE }}
+          version_label: ${{ steps.build-number.outputs.BUILD_NUMBER }}
+          version_description: Version ${{steps.build-number.outputs.BUILD_NUMBER}} deployed via github actions ${{ github.sha }}
+          region: eu-south-1
+          wait_for_deployment: 60
         if: always()
