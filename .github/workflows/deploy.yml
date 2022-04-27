@@ -1,0 +1,41 @@
+name: CICD
+
+on:
+  push:
+    branches: [ master ]
+
+  workflow_dispatch:
+
+env:
+  # Java
+  JAVA_VERSION: 11
+  # DockerHub
+  DOCKER_HUB_USERNAME: encap02
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    services:
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Java JDK
+        uses: actions/setup-java@v1.4.3
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Build Number
+        id: build-number
+        run: echo "::set-output name=BUILD_NUMBER::$(date '+%-d.%-m.%Y.%-H.%-M.%-S')"
+
+      - name: Docker Login
+        uses: docker/login-action@f3364599c6aa293cdc2b8391b1b56d0c30e45c8a
+        with:
+          username: ${{ env.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+
+      - name: Change permissions
+        run: chmod +x ./mvnw
+      - name: Maven Clean install and Push to Dockerhub
+        run: ./mvnw clean package --no-transfer-progress -P jib-push-to-dockerhub -Dapp.image.tag=${{steps.build-number.outputs.BUILD_NUMBER}}
+        if: always()
