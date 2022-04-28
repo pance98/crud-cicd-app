@@ -34,7 +34,7 @@ public class DataInitializer {
     public void initData() {
         User admin = this.userService.create(ADMIN, ADMIN, Role.ROLE_ADMIN);
 
-        for (int i = 1; i < 6; i++) {
+        for (int i = 1; i < 7; i++) {
             this.categoryService.create("Category " + i);
         }
 
