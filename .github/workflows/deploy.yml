@@ -21,7 +21,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
+          text: 'CICD ongoing... :eyes:'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
       - uses: actions/checkout@v2
+
       - name: Setup Java JDK
         uses: actions/setup-java@v1.4.3
         with:
@@ -41,6 +50,14 @@ jobs:
         run: chmod +x ./mvnw
       - name: Maven Clean install and Push to Dockerhub
         run: ./mvnw clean install --no-transfer-progress -P jib-push-to-dockerhub -Dapp.image.tag=${{steps.build-number.outputs.BUILD_NUMBER}}
+      - uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
+          text: ':white_check_mark: pushed encap02/crud-app:${{steps.build-number.outputs.BUILD_NUMBER}} to docker hub... https://hub.docker.com/repository/docker/encap02/crud-app'
+        env:
+            SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
       - name: Update and commit app version in docker-compose.yaml
         run: |
           BUILD_NUMBER=${{steps.build-number.outputs.BUILD_NUMBER}}
@@ -52,6 +69,14 @@ jobs:
           git add elasticbeanstalk/docker-compose.yml
           git commit -m "new app version: ${BUILD_NUMBER}"
           git push
+      - uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
+          text: ':elasticbeanstalk: :aws: Deployment started... :grimacing: :crossed_fingers:'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
       - name: Beanstalk Deploy
         uses: einaregilsson/beanstalk-deploy@v20
         with:
@@ -64,4 +89,12 @@ jobs:
           version_description: Version ${{steps.build-number.outputs.BUILD_NUMBER}} deployed via github actions ${{ github.sha }}
           region: eu-south-1
           wait_for_deployment: 60
-        if: always()
+
+         - uses: 8398a7/action-slack@v3
+           with:
+            status: ${{ job.status }}
+            fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
+            text: ':tada: :arrow_right: http://crudcicdapp-env.eba-5xree5ut.eu-south-1.elasticbeanstalk.com/'
+           env:
+              SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+    if: always()
