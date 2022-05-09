@@ -18,8 +18,8 @@ env:
   DOCKER_HUB_USERNAME: encap02
   # AWS & Elastic Bean Stalk
 
-  EB_ENVIRONMENT_NAME: Appfullstack-env
-  EB_APPLICATION_NAME: app-fullstack
+  EB_ENVIRONMENT_NAME: Crudcicdapp-env
+  EB_APPLICATION_NAME: crud-cicd-app
   EB_DEPLOYMENT_PACKAGE: elasticbeanstalk/docker-compose.yml
 
 jobs:
