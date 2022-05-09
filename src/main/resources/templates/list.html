@@ -22,7 +22,52 @@
 
     th {
         background-color: pink;
-        co
+
+    }
+    .button-1 {
+        background-color: #EA4C89;
+        border-radius: 8px;
+        border-style: none;
+        box-sizing: border-box;
+        color: #FFFFFF;
+        cursor: pointer;
+        display: inline-block;
+        font-family: "Haas Grot Text R Web", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        height: 40px;
+        line-height: 20px;
+        list-style: none;
+        margin: 0;
+        outline: none;
+        padding: 10px 16px;
+        position: relative;
+        text-align: center;
+        text-decoration: none;
+        transition: color 100ms;
+        vertical-align: baseline;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: manipulation;
+    }
+
+    .button-1:hover,
+    .button-1:focus {
+        background-color: #F082AC;
+    }
+    a {
+        color: white;
+        text-decoration: none;
+    }
+
+    a:hover {
+        color:#00A0C6;
+        text-decoration:none;
+        cursor:pointer;
+    }
+    .filter {
+        margin: 0
+    }
 
 
 </style>
@@ -30,6 +75,7 @@
 
 <div class="content">
     <!-- Page content -->
+    <h4 class="filter">Search products</h4>
     <div>
         <!-- The form below should invoke the method ProductsController.showProducts -->
         <form id="filter-form">
@@ -45,22 +91,13 @@
             </select>
             <button id="filter" type="submit">Filter</button>
         </form>
-        <div>
-            <!-- ProductsController.showAdd -->
 
-                <a href="/products/add"  sec:authorize="hasRole('ROLE_ADMIN')" class="add-item">
-                    ADD new product
-                </a>
-
-
-        </div>
         <table>
             <tr>
                 <th>Product name</th>
-                <th>Price</th>
+                <th>Price $$</th>
                 <th>Quantity</th>
                 <th>Categories</th>
-                <th>Creator</th>
                 <th>Actions</th>
             </tr>
             <!-- For each product you should have one <tr> like below -->
@@ -75,29 +112,35 @@
                             th:text="${cat.name}">[cat.name]</li>
                     </ul>
                 </td>
-                <td th:text="${prod.creator?.username}">[prod.creator.username]</td>
                 <td>
                     <!-- ProductsController.delete -->
                     <form method="POST" th:action="@{'/products/{id}/delete' (id=${prod.id})}"
-                          sec:authorize="hasRole('ROLE_ADMIN')">
+                    >
                         <button type="submit" class="delete-item">Delete</button>
                     </form>
                     <!-- ProductsController.showEdit -->
+                    <button type="submit"
                     <a th:href="@{'/products/{id}/edit' (id=${prod.id})}"
-                       sec:authorize="hasRole('ROLE_ADMIN')"
+
                        class="edit-item">Edit</a>
+                    </button>
                 </td>
             </tr>
         </table>
 
     </div>
     <div>
-        <ul id="nav">
-            <li><a href="/">Home</a></li>
-            <li><a href="/login">Login</a></li>
-            <li><a href="/logout">Logout</a></li>
-        </ul>
+        <!-- ProductsController.showAdd -->
+        <button class="button-1" role="button">
+            <a href="/products/add" class="add-item">
+                ADD new product
+            </a>
+        </button>
+
+
+
     </div>
+
 </div>
 
 </body>
