@@ -30,8 +30,6 @@ public class Product {
     @ManyToMany
     private List<Category> categories;
 
-    @ManyToOne
-    private User creator;
 
 
     public Long getId() {
@@ -74,11 +72,5 @@ public class Product {
         this.categories = categories;
     }
 
-    public User getCreator() {
-        return creator;
-    }
 
-    public void setCreator(User creator) {
-        this.creator = creator;
-    }
 }
