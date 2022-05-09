@@ -7,19 +7,34 @@ on:
   workflow_dispatch:
 
 env:
+  # Postgres
+  POSTGRESQL_VERSION: latest
+  POSTGRESQL_DB: ebdb
+  POSTGRESQL_USER: encap02
+  POSTGRESQL_PASSWORD: password123
   # Java
   JAVA_VERSION: 11
   # DockerHub
   DOCKER_HUB_USERNAME: encap02
   # AWS & Elastic Bean Stalk
-  EB_ENVIRONMENT_NAME: Crudcicdapp-env
-  EB_APPLICATION_NAME: crud-cicd-app
+
+  EB_ENVIRONMENT_NAME: Appfullstack-env
+  EB_APPLICATION_NAME: app-fullstack
   EB_DEPLOYMENT_PACKAGE: elasticbeanstalk/docker-compose.yml
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_DB: ${{ env.POSTGRESQL_DB }}
+          POSTGRES_USER: ${{ env.POSTGRESQL_USER }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRESQL_PASSWORD }}
+        ports:
+          - 54320:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
       - uses: 8398a7/action-slack@v3
         with:
@@ -49,27 +64,26 @@ jobs:
       - name: Change permissions
         run: chmod +x ./mvnw
       - name: Maven Clean install and Push to Dockerhub
-        run: ./mvnw clean install --no-transfer-progress -P jib-push-to-dockerhub -Dapp.image.tag=${{steps.build-number.outputs.BUILD_NUMBER}}
+        run: ./mvnw clean package --no-transfer-progress -P jib-push-to-dockerhub -Dapp.image.tag=${{steps.build-number.outputs.BUILD_NUMBER}}
       - uses: 8398a7/action-slack@v3
         with:
           status: ${{ job.status }}
           fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
-          text: ':white_check_mark: pushed encap02/crud-app:${{steps.build-number.outputs.BUILD_NUMBER}} to docker hub... https://hub.docker.com/repository/docker/encap02/crud-app'
+          text: ':white_check_mark: pushed encap02/crud-app:${{steps.build-number.outputs.BUILD_NUMBER}} to docker hub... https://hub.docker.com/repository/docker/encap02/springboot-react-fullstack'
         env:
-            SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
       - name: Update and commit app version in docker-compose.yaml
         run: |
           BUILD_NUMBER=${{steps.build-number.outputs.BUILD_NUMBER}}
           echo -e "Current elasticbeanstalk/docker-compose.yml\n$(cat elasticbeanstalk/docker-compose.yml)"
-          sed -i -E 's_(encap02/crud-app:)([^"]*)_\1'${BUILD_NUMBER}'_' elasticbeanstalk/docker-compose.yml
+          sed -i -E 's_(encap02/springboot-react-fullstack:)([^"]*)_\1'${BUILD_NUMBER}'_' elasticbeanstalk/docker-compose.yml
           echo -e "Current elasticbeanstalk/docker-compose.yml\n$(cat elasticbeanstalk/docker-compose.yml)"
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add elasticbeanstalk/docker-compose.yml
           git commit -m "new app version: ${BUILD_NUMBER}"
           git push
-
       - uses: 8398a7/action-slack@v3
         with:
           status: ${{ job.status }}
@@ -87,14 +101,13 @@ jobs:
           deployment_package: ${{ env.EB_DEPLOYMENT_PACKAGE }}
           version_label: ${{ steps.build-number.outputs.BUILD_NUMBER }}
           version_description: Version ${{steps.build-number.outputs.BUILD_NUMBER}} deployed via github actions ${{ github.sha }}
-          region: eu-south-1
+          region: eu-central-1
           wait_for_deployment: 60
-
-       - uses: 8398a7/action-slack@v3
-         with:
+      - uses: 8398a7/action-slack@v3
+        with:
           status: ${{ job.status }}
           fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
-          text: ':tada: :arrow_right: http://crudcicdapp-env.eba-5xree5ut.eu-south-1.elasticbeanstalk.com/'
-         env:
+          text: ':tada: :arrow_right: http://crudcicdapp-env.eba-5xree5ut.eu-south-1.elasticbeanstalk.com'
+        env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-    if: always()
+        if: always()
