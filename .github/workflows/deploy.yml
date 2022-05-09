@@ -18,8 +18,8 @@ env:
   DOCKER_HUB_USERNAME: encap02
   # AWS & Elastic Bean Stalk
 
-  EB_ENVIRONMENT_NAME: Crudcicdapp-env
-  EB_APPLICATION_NAME: crud-cicd-app
+  EB_ENVIRONMENT_NAME: Appfullstack-env
+  EB_APPLICATION_NAME: app-fullstack
   EB_DEPLOYMENT_PACKAGE: elasticbeanstalk/docker-compose.yml
 
 jobs:
@@ -101,7 +101,7 @@ jobs:
           deployment_package: ${{ env.EB_DEPLOYMENT_PACKAGE }}
           version_label: ${{ steps.build-number.outputs.BUILD_NUMBER }}
           version_description: Version ${{steps.build-number.outputs.BUILD_NUMBER}} deployed via github actions ${{ github.sha }}
-          region: eu-central-1
+          region: eu-south-1
           wait_for_deployment: 60
       - uses: 8398a7/action-slack@v3
         with:
