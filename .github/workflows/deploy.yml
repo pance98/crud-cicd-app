@@ -69,6 +69,7 @@ jobs:
           git add elasticbeanstalk/docker-compose.yml
           git commit -m "new app version: ${BUILD_NUMBER}"
           git push
+
       - uses: 8398a7/action-slack@v3
         with:
           status: ${{ job.status }}
@@ -76,7 +77,6 @@ jobs:
           text: ':elasticbeanstalk: :aws: Deployment started... :grimacing: :crossed_fingers:'
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
       - name: Beanstalk Deploy
         uses: einaregilsson/beanstalk-deploy@v20
         with:
@@ -90,11 +90,11 @@ jobs:
           region: eu-south-1
           wait_for_deployment: 60
 
-         - uses: 8398a7/action-slack@v3
-           with:
-            status: ${{ job.status }}
-            fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
-            text: ':tada: :arrow_right: http://crudcicdapp-env.eba-5xree5ut.eu-south-1.elasticbeanstalk.com/'
-           env:
-              SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+       - uses: 8398a7/action-slack@v3
+         with:
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
+          text: ':tada: :arrow_right: http://crudcicdapp-env.eba-5xree5ut.eu-south-1.elasticbeanstalk.com/'
+         env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
     if: always()
