@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   backend:
-    image: "encap02/crud-app:10.5.2022.0.59.55"
+    image: "encap02/crud-app:10.5.2022.22.29.45"
     ports:
       - "80:8080"
     restart: "always"
