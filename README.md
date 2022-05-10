@@ -8,4 +8,4 @@ and the app is deployed on AWS elastic beanstalk
 
 http://crudcicdapp-env.eba-5xree5ut.eu-south-1.elasticbeanstalk.com
 
-to add/edit an item login using  admin/admin - username and password on the login page.
+
